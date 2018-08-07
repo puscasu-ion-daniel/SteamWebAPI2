@@ -49,8 +49,7 @@ namespace SteamWebAPI2.Interfaces
                 : steamWebInterface;
 
             this.appId = (uint)appId;
-
-            validSchemaAppIds.Add((uint)EconItemsAppId.TeamFortress2);
+            
             validSchemaAppIds.Add((uint)EconItemsAppId.Dota2);
             validSchemaAppIds.Add((uint)EconItemsAppId.Portal2);
             validSchemaAppIds.Add((uint)EconItemsAppId.Portal2_Beta);
@@ -113,7 +112,7 @@ namespace SteamWebAPI2.Interfaces
         /// </summary>
         /// <param name="language"></param>
         /// <returns></returns>
-        public async Task<ISteamWebResponse<Steam.Models.TF2.SchemaModel>> GetSchemaForTF2Async(string language = "en_us")
+        public async Task<ISteamWebResponse<Steam.Models.TF2.SchemaModel>> GetSchemaItemsForTF2Async(string language = "en_us")
         {
             if (this.appId != (int)EconItemsAppId.TeamFortress2)
             {
@@ -124,7 +123,25 @@ namespace SteamWebAPI2.Interfaces
 
             parameters.AddIfHasValue(language, "language");
 
-            var steamWebResponse = await steamWebInterface.GetAsync<SchemaResultContainer>("GetSchema", 1, parameters);
+            var steamWebResponse = await steamWebInterface.GetAsync<SchemaResultContainer>("GetSchemaItems", 1, parameters);
+
+            var steamWebResponseModel = AutoMapperConfiguration.Mapper.Map<ISteamWebResponse<SchemaResultContainer>, ISteamWebResponse<Steam.Models.TF2.SchemaModel>>(steamWebResponse);
+
+            return steamWebResponseModel;
+        }
+
+        public async Task<ISteamWebResponse<Steam.Models.TF2.SchemaModel>> GetSchemaOverviewForTF2Async(string language = "en_us")
+        {
+            if (this.appId != (int)EconItemsAppId.TeamFortress2)
+            {
+                throw new InvalidOperationException(String.Format("AppId {0} is not valid for the GetSchemaTF2 method.", appId));
+            }
+
+            List<SteamWebRequestParameter> parameters = new List<SteamWebRequestParameter>();
+
+            parameters.AddIfHasValue(language, "language");
+
+            var steamWebResponse = await steamWebInterface.GetAsync<SchemaResultContainer>("GetSchemaOverview", 1, parameters);
 
             var steamWebResponseModel = AutoMapperConfiguration.Mapper.Map<ISteamWebResponse<SchemaResultContainer>, ISteamWebResponse<Steam.Models.TF2.SchemaModel>>(steamWebResponse);
 
