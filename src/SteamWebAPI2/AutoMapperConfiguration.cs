@@ -318,20 +318,11 @@ namespace SteamWebAPI2
                         src => Mapper.Map<BadgesResult, BadgesResultModel>(src.Result)
                     );
 
-                    x.CreateMap<SteamLevelResultContainer, uint?>().ConvertUsing(src =>
-                    {
-                        if (src.Result == null)
-                        {
-                            return null;
-                        }
-                        else
-                        {
-                            return src.Result.PlayerLevel;
-                        }
-                    });
+                    x.CreateMap<SteamLevelResultContainer, uint?>().ConvertUsing((src, _)
+                        => src.Result?.PlayerLevel);
 
                     x.CreateMap<OwnedGame, OwnedGameModel>()
-                    .ForMember(dest => dest.PlaytimeLastTwoWeeks, opts => opts.ResolveUsing(src =>
+                    .ForMember(dest => dest.PlaytimeLastTwoWeeks, opts => opts.MapFrom((src, _) =>
                     {
                         if (!src.Playtime2weeks.HasValue)
                         {
@@ -339,10 +330,8 @@ namespace SteamWebAPI2
                         }
                         return TimeSpan.FromMinutes(src.Playtime2weeks.Value);
                     }))
-                    .ForMember(dest => dest.PlaytimeForever, opts => opts.ResolveUsing(src =>
-                    {
-                        return TimeSpan.FromMinutes(src.PlaytimeForever);
-                    }));
+                    .ForMember(dest => dest.PlaytimeForever, opts => opts.MapFrom((src, _) 
+                            => TimeSpan.FromMinutes(src.PlaytimeForever)));
                     x.CreateMap<OwnedGamesResult, OwnedGamesResultModel>();
                     x.CreateMap<OwnedGamesResultContainer, OwnedGamesResultModel>().ConvertUsing(
                         src => Mapper.Map<OwnedGamesResult, OwnedGamesResultModel>(src.Result)
@@ -383,21 +372,18 @@ namespace SteamWebAPI2
                     #region Endpoint: SteamRemoteStorage
 
                     x.CreateMap<uint, PublishedFileVisibility>()
-                        .ConvertUsing(src =>
-                        {
-                            return (PublishedFileVisibility)src;
-                        });
+                        .ConvertUsing(src => (PublishedFileVisibility)src);
                     x.CreateMap<PublishedFileDetails, PublishedFileDetailsModel>()
                         .ForMember(dest => dest.FileUrl, opts => opts.MapFrom(source => new Uri(source.FileUrl)))
                         .ForMember(dest => dest.PreviewUrl, opts => opts.MapFrom(source => new Uri(source.PreviewUrl)));
                     x.CreateMap<PublishedFileDetailsResultContainer, IReadOnlyCollection<PublishedFileDetailsModel>>()
                         .ConvertUsing(
-                            src => Mapper.Map<IList<PublishedFileDetails>, IReadOnlyCollection<PublishedFileDetailsModel>>(
+                            (src, _) => Mapper.Map<IList<PublishedFileDetails>, IReadOnlyCollection<PublishedFileDetailsModel>>(
                                 src.Result?.Result == 1 ? src.Result.Details : null)
                     );
                     x.CreateMap<PublishedFileDetailsResultContainer, PublishedFileDetailsModel>()
                         .ConvertUsing(
-                            src => Mapper.Map<PublishedFileDetails, PublishedFileDetailsModel>(
+                            (src, _) => Mapper.Map<PublishedFileDetails, PublishedFileDetailsModel>(
                                 src.Result?.Result == 1 ? src.Result.Details?.SingleOrDefault() : null)
                         );
 
